@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Weather Widget</title>
+
+<style>
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: transparent;
+  }
+
+  .widget {
+    width: 100%;
+    max-width: 720px;
+    padding: 20px 24px;
+    border-radius: 16px;
+    background: #f5f5f5;
+    color: #2f2f2f;
+  }
+
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .left h1 {
+    font-size: 15px;
+    margin: 0;
+    letter-spacing: 1px;
+    font-weight: 600;
+  }
+
+  .left span {
+    font-size: 11px;
+    opacity: 0.6;
+  }
+
+  .right {
+    text-align: right;
+  }
+
+  .temp {
+    font-size: 30px;
+    font-weight: 600;
+  }
+
+  .desc {
+    font-size: 12px;
+    opacity: 0.7;
+  }
+
+  .forecast {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 22px;
+  }
+
+  .day {
+    text-align: center;
+    font-size: 13px;
+    flex: 1;
+  }
+
+  .icon {
+    font-size: 22px;
+    margin: 6px 0;
+  }
+
+  .date {
+    font-size: 11px;
+    opacity: 0.6;
+    margin-bottom: 2px;
+  }
+
+  .temps {
+    font-size: 12px;
+    line-height: 1.3;
+  }
+
+  .label {
+    font-size: 10px;
+    opacity: 0.6;
+  }
+
+  .controls {
+    margin-top: 16px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  input {
+    font-size: 11px;
+    padding: 4px;
+  }
+
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    font-size: 11px;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="widget">
+
+  <!-- HEADER -->
+  <div class="top">
+    <div class="left">
+      <h1 id="location">SAPPORO</h1>
+      <span>WEATHER</span>
+    </div>
+
+    <div class="right">
+      <div class="temp" id="temp">--°C</div>
+      <div class="desc" id="desc">Loading...</div>
+    </div>
+  </div>
+
+  <!-- FORECAST -->
+  <div class="forecast" id="forecast"></div>
+
+  <!-- DATE RANGE CONTROLS -->
+  <div class="controls">
+    <div class="control-group">
+      <label>Start Date</label>
+      <input type="date" id="startDate">
+    </div>
+
+    <div class="control-group">
+      <label>End Date</label>
+      <input type="date" id="endDate">
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // 📍 LOCATION (EDIT IF YOU WANT)
+  const lat = 43.0556;
+  const lon = 141.3533;
+  const locationName = "SAPPORO";
+
+  document.getElementById("location").textContent = locationName;
+
+  let apiTemps = [];
+
+  // 🌤️ WEATHER API
+  fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto`)
+    .then(res => res.json())
+    .then(data => {
+
+      // current temp
+      document.getElementById("temp").textContent =
+        Math.round(data.current_weather.temperature) + "°C";
+
+      document.getElementById("desc").textContent = "current weather";
+
+      apiTemps = data.daily;
+
+      renderForecast(generateDates(data.daily.time[0], data.daily.time[4]));
+      initDateControls(data.daily.time[0], data.daily.time[4]);
+    });
+
+  // 🌥️ ICON LOGIC
+  function getIcon(code) {
+    if (code === 0) return "☀️";
+    if (code <= 3) return "⛅";
+    if (code <= 48) return "☁️";
+    if (code <= 67) return "🌧️";
+    if (code <= 77) return "❄️";
+    if (code <= 99) return "⛈️";
+    return "☁️";
+  }
+
+  // 📅 GENERATE DATE RANGE
+  function generateDates(start, end) {
+    const dates = [];
+    let current = new Date(start);
+    const last = new Date(end);
+
+    while (current <= last && dates.length < 5) {
+      dates.push(new Date(current));
+      current.setDate(current.getDate() + 1);
+    }
+
+    return dates;
+  }
+
+  // 🎯 RENDER FORECAST
+  function renderForecast(dates) {
+    const forecastDiv = document.getElementById("forecast");
+    forecastDiv.innerHTML = "";
+
+    dates.forEach((date, i) => {
+      const el = document.createElement("div");
+      el.className = "day";
+
+      el.innerHTML = `
+        <div>${date.toLocaleDateString('en-US', { weekday: 'short' })}</div>
+        <div class="icon">${getIcon(apiTemps.weathercode[i])}</div>
+        <div class="date">
+          ${date.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric'
+          })}
+        </div>
+        <div class="temps">
+          <div><span class="label">High</span><br>${Math.round(apiTemps.temperature_2m_max[i])}°C</div>
+          <div><span class="label">Low</span><br>${Math.round(apiTemps.temperature_2m_min[i])}°C</div>
+        </div>
+      `;
+
+      forecastDiv.appendChild(el);
+    });
+  }
+
+  // 🎛️ DATE CONTROLS
+  function initDateControls(defaultStart, defaultEnd) {
+    const startInput = document.getElementById("startDate");
+    const endInput = document.getElementById("endDate");
+
+    startInput.value = defaultStart;
+    endInput.value = defaultEnd;
+
+    function update() {
+      if (!startInput.value || !endInput.value) return;
+
+      const dates = generateDates(startInput.value, endInput.value);
+      renderForecast(dates);
+    }
+
+    startInput.addEventListener("change", update);
+    endInput.addEventListener("change", update);
+  }
+</script>
+
+</body>
+</html>
