@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>Custom Weather Widget</title>
+
+<style>
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: transparent;
+  }
+
+  .widget {
+    width: 100%;
+    max-width: 420px;
+    padding: 16px 18px;
+    border-radius: 16px;
+    background: #ffffff;
+    color: #37352f;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  }
+
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .location {
+    font-size: 14px;
+    opacity: 0.7;
+  }
+
+  .temp {
+    font-size: 42px;
+    font-weight: 600;
+  }
+
+  .desc {
+    font-size: 14px;
+    margin-top: 2px;
+    opacity: 0.8;
+  }
+
+  .date {
+    font-size: 13px;
+    margin-top: 6px;
+    opacity: 0.6;
+  }
+
+  .controls {
+    margin-top: 12px;
+    display: flex;
+    gap: 6px;
+  }
+
+  input, select {
+    font-size: 12px;
+    padding: 4px 6px;
+  }
+
+  .forecast {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .day {
+    flex: 1;
+    font-size: 12px;
+    text-align: center;
+    opacity: 0.8;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="widget">
+
+  <div class="top">
+    <div>
+      <div class="location" id="location">Sapporo</div>
+      <div class="temp" id="temp">--°</div>
+      <div class="desc" id="desc">Loading...</div>
+      <div class="date" id="dateText">Apr 5</div>
+    </div>
+  </div>
+
+  <div class="forecast" id="forecast"></div>
+
+  <!-- 🔓 EDIT CONTROLS -->
+  <div class="controls">
+    <input type="date" id="datePicker">
+    <select id="layout">
+      <option value="default">Default</option>
+      <option value="compact">Compact</option>
+    </select>
+  </div>
+
+</div>
+
+<script>
+  // 🌤️ WEATHER (Open-Meteo free API)
+  const lat = 43.0556;
+  const lon = 141.3533;
+
+  fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=temperature_2m_max,temperature_2m_min&timezone=auto`)
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("temp").textContent =
+        Math.round(data.current_weather.temperature) + "°";
+
+      document.getElementById("desc").textContent = "Current weather";
+
+      // forecast
+      const forecastDiv = document.getElementById("forecast");
+      forecastDiv.innerHTML = "";
+
+      data.daily.time.slice(0, 5).forEach((day, i) => {
+        const el = document.createElement("div");
+        el.className = "day";
+        el.innerHTML = `
+          <div>${new Date(day).toLocaleDateString('en-US', { weekday: 'short' })}</div>
+          <div>${Math.round(data.daily.temperature_2m_max[i])}°</div>
+        `;
+        forecastDiv.appendChild(el);
+      });
+    });
+
+  // 📅 DATE CONTROL (FULLY EDITABLE)
+  let customDate = new Date();
+
+  function updateDate() {
+    const options = { month: 'short', day: 'numeric' };
+    document.getElementById("dateText").textContent =
+      customDate.toLocaleDateString('en-US', options);
+  }
+
+  updateDate();
+
+  document.getElementById("datePicker").addEventListener("change", (e) => {
+    customDate = new Date(e.target.value);
+    updateDate();
+  });
+
+  // 🎨 LAYOUT CONTROL
+  document.getElementById("layout").addEventListener("change", (e) => {
+    const widget = document.querySelector(".widget");
+
+    if (e.target.value === "compact") {
+      widget.style.padding = "10px";
+      widget.style.fontSize = "12px";
+    } else {
+      widget.style.padding = "16px";
+      widget.style.fontSize = "14px";
+    }
+  });
+</script>
+
+</body>
+</html>
