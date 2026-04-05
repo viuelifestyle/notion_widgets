@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap" rel="stylesheet">
+
+<title>Trip Countdown</title>
+
+<style>
+  body {
+    text-align: center;
+    font-family: 'Fjalla One', sans-serif;
+    background-color: #fff;
+  }
+
+  .title {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+
+  .box {
+    display: inline-block;
+    padding: 10px;
+    min-width: 60px;
+    height: 55px;
+    border: 3px solid #000;
+    border-radius: 6px;
+    box-shadow: 2px 2px 1px 0px #000;
+    background: #ffffff; /* ALL WHITE */
+  }
+
+  h2 {
+    display: inline-block;
+    margin: 5px;
+    font-size: 20px;
+  }
+
+  .small {
+    font-size: 12px;
+    font-weight: lighter;
+  }
+
+</style>
+</head>
+
+<body>
+
+<div id="counter">
+
+  <!-- TITLE (dynamic) -->
+  <div class="title" id="statusText">Loading...</div>
+
+  <!-- COUNTDOWN -->
+  <h2 class="box" id="years"></h2>
+  <h2 class="box" id="months"></h2>
+  <h2 class="box" id="days"></h2>
+
+</div>
+
+<script>
+
+  // ✏️ EDIT YOUR TRIP DATE HERE
+  const tripDate = new Date("2026-12-25"); // YYYY-MM-DD
+
+  function updateCountdown() {
+
+    const now = new Date();
+
+    let start = new Date(now);
+    let end = new Date(tripDate);
+
+    let isPast = false;
+
+    if (now > tripDate) {
+      isPast = true;
+      start = new Date(tripDate);
+      end = new Date(now);
+    }
+
+    let years = end.getFullYear() - start.getFullYear();
+    let months = end.getMonth() - start.getMonth();
+    let days = end.getDate() - start.getDate();
+
+    if (days < 0) {
+      months--;
+      const prevMonth = new Date(end.getFullYear(), end.getMonth(), 0);
+      days += prevMonth.getDate();
+    }
+
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+
+    // DISPLAY
+    document.getElementById("years").innerHTML =
+      years + "<br><span class='small'>years</span>";
+
+    document.getElementById("months").innerHTML =
+      months + "<br><span class='small'>months</span>";
+
+    document.getElementById("days").innerHTML =
+      days + "<br><span class='small'>days</span>";
+
+    // STATUS TEXT
+    const text = `${years}y ${months}m ${days}d ${isPast ? "ago" : "to go"}`;
+    document.getElementById("statusText").textContent = text;
+  }
+
+  updateCountdown();
+
+</script>
+
+</body>
+</html>
