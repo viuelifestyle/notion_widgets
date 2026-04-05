@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<style>
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    background: transparent;
+  }
+
+  .widget {
+    width: 100%;
+    max-width: 420px;
+    margin: auto;
+    padding: 20px;
+    border-radius: 20px;
+    background: #ffffff;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+    transition: 0.3s ease;
+  }
+
+  /* ✨ STYLE MODES */
+  .minimal { background: #ffffff; }
+  .soft { background: #f7f7fb; }
+  .dark { background: #1f1f1f; color: white; }
+
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .location {
+    font-weight: 600;
+    font-size: 18px;
+  }
+
+  .date {
+    font-size: 13px;
+    opacity: 0.6;
+    cursor: pointer;
+  }
+
+  .temp {
+    font-size: 48px;
+    font-weight: 600;
+    margin: 10px 0;
+  }
+
+  .desc {
+    font-size: 14px;
+    opacity: 0.7;
+    margin-bottom: 15px;
+  }
+
+  /* ✨ LAYOUT OPTIONS */
+  .horizontal .forecast {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .grid .forecast {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+  }
+
+  .day {
+    text-align: center;
+    font-size: 12px;
+  }
+
+  /* ✨ EDIT PANEL */
+  .controls {
+    margin-top: 15px;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+  }
+
+  input, select {
+    width: 100%;
+    margin-top: 6px;
+    padding: 6px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 12px;
+  }
+
+</style>
+</head>
+
+<body>
+
+<div id="widget" class="widget minimal horizontal">
+
+  <div class="top">
+    <div class="location" id="location">Tokyo</div>
+    <div class="date" id="date">April 5, 2026</div>
+  </div>
+
+  <div class="temp" id="temp">24°C</div>
+  <div class="desc" id="desc">Sunny</div>
+
+  <div class="forecast" id="forecast">
+    <div class="day">Mon<br>25°</div>
+    <div class="day">Tue<br>22°</div>
+    <div class="day">Wed<br>23°</div>
+    <div class="day">Thu<br>21°</div>
+    <div class="day">Fri<br>24°</div>
+  </div>
+
+  <!-- ✨ CONTROL PANEL -->
+  <div class="controls">
+
+    <input placeholder="Edit location" oninput="setText('location', this.value)">
+    <input placeholder="Edit date" oninput="setText('date', this.value)">
+    <input placeholder="Edit temperature" oninput="setText('temp', this.value)">
+    <input placeholder="Edit description" oninput="setText('desc', this.value)">
+
+    <select onchange="changeStyle(this.value)">
+      <option value="minimal">Minimal</option>
+      <option value="soft">Soft</option>
+      <option value="dark">Dark</option>
+    </select>
+
+    <select onchange="changeLayout(this.value)">
+      <option value="horizontal">Horizontal</option>
+      <option value="grid">Grid</option>
+    </select>
+
+  </div>
+
+</div>
+
+<script>
+function setText(id, value) {
+  if (value) document.getElementById(id).innerText = value;
+}
+
+function changeStyle(style) {
+  const el = document.getElementById("widget");
+  el.classList.remove("minimal", "soft", "dark");
+  el.classList.add(style);
+}
+
+function changeLayout(layout) {
+  const el = document.getElementById("widget");
+  el.classList.remove("horizontal", "grid");
+  el.classList.add(layout);
+}
+</script>
+
+</body>
+</html>
